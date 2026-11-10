@@ -1,0 +1,9 @@
+[build]
+  publish = "dist"
+  command = "python tools/publish.py"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Cache-Control = "public, max-age=3600"

@@ -7,22 +7,23 @@ import { panel, text, UI } from './draw.js';
 
 const ROOT = [
   { id: 'resume', label: 'Lanjut', hint: 'Tutup menu dan lanjutkan permainan' },
+  { id: 'math', label: '📐 Matematika', hint: 'Latihan soal matematika SMA (10 soal)' },
   { id: 'help', label: 'Petunjuk', hint: 'Kontrol dan cara bermain' },
   { id: 'settings', label: 'Pengaturan', hint: 'Volume musik dan zoom tampilan' },
   { id: 'quit', label: 'Keluar', hint: 'Kembali ke menu utama' },
 ];
 
 const HELP = [
-  ['WASD / panah', 'Berjalan'],
-  ['Shift (tahan)', 'Berlari'],
-  ['E di tepi air', 'Memancing (pegang pancing)'],
-  ['E / Spasi', 'Pakai barang, makan, bicara, panen, tidur'],
+  ['WASD / panah / joystick', 'Berjalan (di HP pakai joystick kiri)'],
+  ['Shift (tahan) / 🏃', 'Berlari'],
+  ['E / tombol E', 'Pakai barang, bicara, panen, tidur, jawab kuis'],
+  ['M / tombol 📐', 'Buka latihan matematika'],
   ['1 – 9', 'Pilih alat di hotbar'],
   ['X / Z / roda', 'Alat berikutnya / sebelumnya'],
-  ['I atau Tab', 'Buka inventori'],
+  ['I atau Tab / 🎒', 'Buka inventori'],
   ['Backspace', 'Buang barang (di inventori)'],
-  ['G', 'Beri hadiah ke warga'],
-  ['Esc', 'Buka menu ini'],
+  ['G / 🎁', 'Beri hadiah ke warga'],
+  ['Esc / ☰', 'Buka menu ini'],
 ];
 
 // Lines stay short: the panel must fit a 640x360 viewport without clipping.
@@ -31,17 +32,18 @@ const HELP = [
 // pernah ditulis dan langsung basi begitu warung dan klinik dibuka. Papan
 // pengumuman di plaza membacanya langsung dari data, jadi ia yang ditunjuk.
 const HELP_TEXT = [
+  '📐 Matematika: tekan M, tombol 📐, atau E di papan matematika.',
+  'Jawab 10 soal → dapat XP + koin. Nilai terkirim ke Google Sheets.',
   'Cangkul, tanam, siram, panen — di petak kebun.',
-  'Isi penyiram di sumur; jual lewat kotak jual.',
   'Tekan E di depan pintu: tidur, belanja, berobat.',
-  'Jam buka & titipan warga: baca papan di plaza.',
 ];
 
 export class Menu {
-  constructor({ audio, renderer, onQuit }) {
+  constructor({ audio, renderer, onQuit, onMath = null }) {
     this.audio = audio;
     this.renderer = renderer;
     this.onQuit = onQuit;
+    this.onMath = onMath;
     this.open = false;
     this.page = 'root';
     this.cursor = 0;
@@ -104,6 +106,7 @@ export class Menu {
     if (action !== 'interact') return;
     const item = ROOT[this.cursor];
     if (item.id === 'resume') this.close();
+    if (item.id === 'math') { this.close(); this.onMath?.(); }
     if (item.id === 'help') { this.page = 'help'; this.cursor = 0; }
     if (item.id === 'settings') { this.page = 'settings'; this.cursor = 0; }
     if (item.id === 'quit') this.onQuit();

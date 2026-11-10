@@ -6,7 +6,7 @@ import { itemDef } from '../systems/inventory.js';
 
 const SEASON_ICON = { spring: 4, summer: 5, autumn: 6, winter: 7 };
 
-export function drawHud(ctx, { time, player, inv, weather }) {
+export function drawHud(ctx, { time, player, inv, weather, math = null }) {
   const W = view.w, H = view.h;
 
   // --- clock / date / weather / energy, all in one panel
@@ -35,6 +35,22 @@ export function drawHud(ctx, { time, player, inv, weather }) {
   panel(ctx, W - 8 - 150, 8, 150, 40);
   icon(ctx, 'ui_coin', 0, W - 146, 16);
   text(ctx, player.money.toLocaleString('id-ID'), W - 22, 16, { font: UI.fontBig, align: 'right' });
+
+  // --- matematika: level + XP (di bawah panel koin)
+  if (math) {
+    const lvl = math.stats?.level ?? 1;
+    const xp = math.stats?.xp ?? 0;
+    const inLevel = xp % 500;
+    panel(ctx, W - 8 - 190, 54, 190, 36);
+    text(ctx, `📐 Lv ${lvl} · ${xp} XP`, W - 16, 62, { font: UI.fontBig, align: 'right' });
+    const ratio2 = inLevel / 500;
+    ctx.fillStyle = UI.outline;
+    ctx.fillRect(W - 8 - 190 + 10 - 1, 54 + 36 - 10 - 1, 170 + 2, 6 + 2);
+    ctx.fillStyle = '#6b5a3a';
+    ctx.fillRect(W - 8 - 190 + 10, 54 + 36 - 10, 170, 6);
+    ctx.fillStyle = '#4f9a29';
+    ctx.fillRect(W - 8 - 190 + 10, 54 + 36 - 10, Math.round(170 * ratio2), 6);
+  }
 
   // --- hotbar
   const S = 40, gap = 2, n = 9;

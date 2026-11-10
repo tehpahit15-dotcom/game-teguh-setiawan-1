@@ -27,6 +27,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ALWAYS = [
     "index.html",
     "game.html",
+    "manifest.json",
+    "sw.js",
     "src",
     "assets/manifest.json",
     "assets/homepage",

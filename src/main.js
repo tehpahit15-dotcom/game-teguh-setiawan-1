@@ -30,6 +30,10 @@ import { Chat } from './systems/chat.js';
 import { ChatUI } from './ui/chat-ui.js';
 import { AudioSystem } from './systems/audio.js';
 import { Menu } from './ui/menu.js';
+import { MathSystem } from './systems/math.js';
+import { MathUI } from './ui/math-ui.js';
+import { submitScore, flushQueue, readStudentLocal } from './core/sheets.js';
+import { initTouchControls } from './ui/touch.js';
 import { Dialog } from './ui/dialog.js';
 import { text, UI } from './ui/draw.js';
 
@@ -77,8 +81,8 @@ state.chestUI = new ChestUI(state.inv, state.chest);
 async function boot() {
   await document.fonts.ready;
   await loadAssets('assets/', (p) => { loadingEl.textContent = `Memuat aset ${Math.round(p * 100)}%`; });
-  const [items, crops, npcData, shops, fish] = await Promise.all(
-    ['items', 'crops', 'npcs', 'shops', 'fish'].map((f) => fetch(`src/data/${f}.json`).then((r) => r.json())),
+  const [items, crops, npcData, shops, fish, mathData] = await Promise.all(
+    ['items', 'crops', 'npcs', 'shops', 'fish', 'math'].map((f) => fetch(`src/data/${f}.json`).then((r) => r.json())),
   );
   setItemData(items);
   state.shops = shops;
@@ -88,6 +92,10 @@ async function boot() {
   state.requests = new Requests(npcData, items);
   state.fishing = new Fishing(fish);
   state.fishingUI = new FishingUI(state.fishing);
+  state.math = new MathSystem();
+  state.math.load(mathData);
+  state.math.loadJSON(save?.math);
+  state.mathUI = new MathUI(state.math, state.audio, onMathFinish);
 
   const save = readSave(0);
   const fresh = takeNewGame();
@@ -145,6 +153,7 @@ async function boot() {
     audio: state.audio,
     renderer,
     onQuit: () => { saveGame(); location.href = 'index.html'; },
+    onMath: () => state.mathUI.openMenu(),
   });
 
   // Audio is synthesised, so nothing to download — it just needs a gesture to
@@ -163,6 +172,8 @@ async function boot() {
     state.camera.snapTo(state.player.x, state.player.y - 16);
   });
 
+  initTouchControls();
+  flushQueue().then((r) => { if (r.sent) showToast(`${r.sent} nilai tertunda terkirim ke Sheets`, 3); });
   loadingEl.remove();
   canvas.focus();
   if (fresh) showToast(`Selamat datang di ${state.profile.farmName}, ${state.profile.name}!`, 4);
@@ -171,6 +182,37 @@ async function boot() {
 }
 
 function showToast(msg, secs = 3) { state.toast = { msg, t: secs }; }
+
+/** Kuis selesai: beri koin, simpan, kirim nilai ke Google Sheets. */
+async function onMathFinish(summary) {
+  if (!summary) return;
+  state.player.money += summary.coins;
+  saveGame();
+  const student = readStudentLocal() ?? {};
+  const profile = state.profile ?? {};
+  const payload = {
+    nama: student.nama ?? profile.nama ?? profile.name ?? 'Siswa',
+    kelas: student.kelas ?? profile.kelas ?? '-',
+    username: profile.name ?? student.username ?? '-',
+    avatar: profile.avatar ?? student.avatar ?? '',
+    topik: summary.topic,
+    level: summary.level,
+    skor: summary.score,
+    benar: summary.correct,
+    salah: summary.wrong,
+    total: summary.total,
+    xp: summary.xp,
+    streak: summary.bestStreak,
+  };
+  const r = await submitScore(payload);
+  if (state.mathUI) {
+    state.mathUI.sent = r.ok;
+    state.mathUI.sentMsg = r.ok
+      ? 'Nilai terkirim ke Google Sheets ✓'
+      : 'Nilai tersimpan lokal — akan dikirim otomatis saat online';
+  }
+  showToast(r.ok ? 'Nilai terkirim ke Google Sheets ✓' : 'Nilai tersimpan lokal', 3);
+}
 
 // ---------------------------------------------------------------- areas
 /** Swap to `id`, positioning the player at the named entry (null = map spawn). */
@@ -312,6 +354,7 @@ function saveGame() {
     removals: removalsToJSON(),
     social: state.social.toJSON(),
     requests: state.requests.toJSON(),
+    math: state.math ? state.math.toJSON() : null,
     animals: state.areaId === 'valley' && state.animals.length
       ? state.animals.map((a) => ({ fed: a.fed, hasProduce: a.hasProduce, friendship: a.friendship }))
       : state.animalState ?? [],
@@ -450,6 +493,7 @@ function interactTarget() {
     if (m.well && f.c >= m.well.c && f.c <= m.well.c + 1 && f.r === m.well.r) return { kind: 'well', label: 'Isi penyiram' };
     if (m.bin && f.c >= m.bin.c && f.c <= m.bin.c + 1 && f.r === m.bin.r) return { kind: 'bin', label: 'Masukkan ke kotak jual' };
     if (findObj(f.c, f.r, (o) => o.kind === 'notice')) return { kind: 'notice', label: 'Baca papan pengumuman' };
+    if (findObj(f.c, f.r, (o) => o.kind === 'mathboard')) return { kind: 'math', label: 'Latihan Matematika SMA' };
   }
 
   // Water in front of you plus a rod in hand is the whole cast condition. The
@@ -623,6 +667,7 @@ function doInteract() {
       dialog.onClose = () => {
         t.npc.talking = false;
         if (owed) give(gift.item);
+        if (t.npc.id === 'guru') state.mathUI.openMenu();
       };
       break;
     }
@@ -653,6 +698,7 @@ function doInteract() {
       inv.removeAt(inv.index, held.count);
       break;
     }
+    case 'math': state.mathUI.openMenu(); break;
     case 'notice': {
       const req = state.requests.today(dayNumber());
       const done = state.requests.done(dayNumber());
@@ -887,7 +933,8 @@ function update(dt) {
 
   const menu = state.menu;
   if (input.pressed('menu')) {
-    if (state.shopUI?.open) state.shopUI.close();
+    if (state.mathUI?.open) state.mathUI.close();
+    else if (state.shopUI?.open) state.shopUI.close();
     else if (invUI.open) invUI.open = false;
     else if (chestUI.open) chestUI.open = false;
     else if (menu?.open) menu.back();
@@ -905,6 +952,20 @@ function update(dt) {
     input.endFrame();
     return;
   }
+
+  if (state.mathUI?.open) {
+    for (const a of ['up', 'down', 'left', 'right', 'interact']) if (input.pressed(a)) state.mathUI.key(a);
+    if (mouse.clicked && state.mathUI.click(mouse.x, mouse.y)) mouse.clicked = false;
+    if (input.pressed('menu')) state.mathUI.close();
+    state.shadows?.update(dt);
+    state.critters?.update(dt, time.hour24);
+    for (const n of state.npcs) n.update(map, dt);
+    for (const a of state.animals) a.update(map, dt);
+    time.update(dt);
+    input.endFrame();
+    return;
+  }
+  if (input.pressed('math')) { state.mathUI.openMenu(); input.endFrame(); return; }
 
   if (state.fishing?.active) {
     const busy = updateFishing(dt);
@@ -1246,9 +1307,9 @@ function render() {
   // Fireflies go on top of the night tint, not under it — see Critters.split.
   for (const c of critters.airNight) drawCritter(ctx, c, cx, cy);
 
-  drawHud(ctx, { time, player, inv, weather });
+  drawHud(ctx, { time, player, inv, weather, math: state.math });
   state.fishingUI?.draw(ctx);
-  if (!state.fishing?.active && !state.dialog.active && !state.fadeDir && !invUI.open && !chestUI.open && !state.shopUI?.open && !state.menu?.open) {
+  if (!state.fishing?.active && !state.dialog.active && !state.fadeDir && !invUI.open && !chestUI.open && !state.shopUI?.open && !state.menu?.open && !state.mathUI?.open) {
     const t = interactTarget();
     if (t) drawPrompt(ctx, `E  ${t.label}`);
   }
@@ -1256,6 +1317,7 @@ function render() {
   invUI.draw(ctx);
   chestUI.draw(ctx);
   state.shopUI?.draw(ctx);
+  state.mathUI?.draw(ctx);
   if (state.toast) drawToast(ctx, state.toast.msg);
 
   state.chatUI?.draw(ctx);

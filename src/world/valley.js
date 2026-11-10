@@ -234,6 +234,15 @@ export function buildValley() {
   landmarks.push({ name: 'Papan Pengumuman', at: { c: plaza.c0 - 2, r: mainRow - 1 } });
   doorTiles.push([plaza.c0 - 2, mainRow - 1]);
 
+  // Papan Matematika SMA: di sebelah timur pintu Balai Desa, di luar jalur
+  // jalan (jalur Balai ada di plazaCx=34), jadi tidak menghalangi jalan.
+  // Berdiri menghadapnya lalu tekan E untuk membuka latihan matematika.
+  obj('notice_board', plazaCx + 2, map.townHallDoor.r + 1, { kind: 'mathboard' });
+  map.block(plazaCx + 2, map.townHallDoor.r + 1, 2, 1);
+  map.mathBoard = { c: plazaCx + 2, r: map.townHallDoor.r + 1 };
+  landmarks.push({ name: 'Papan Matematika', at: map.mathBoard });
+  doorTiles.push([map.mathBoard.c, map.mathBoard.r]);
+
   // ---- 5b. forest pond ----------------------------------------------------
   // An oval, so the pond does not read as a rectangle of blue.
   const pondCx = (pond.c0 + pond.c1) / 2, pondCy = (pond.r0 + pond.r1) / 2;
@@ -375,6 +384,7 @@ export function buildValley() {
     // Hutan di utara Balai Desa: 120 dari 135 petaknya bisa dilalui, jadi ia
     // punya ruang berkeliling tanpa tersangkut di sela pohon.
     maung: { c: plazaCx + 1, r: map.townHallDoor.r - 6 },
+    guru: { c: plazaCx + 2, r: map.townHallDoor.r + 2 }, // di depan papan matematika
   };
   // Tempat yang bisa disebut namanya oleh jadwal NPC di `npcs.json`. Menaruh
   // koordinat di berkas data akan membuat setiap penggeseran bangunan

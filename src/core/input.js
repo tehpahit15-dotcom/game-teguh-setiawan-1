@@ -1,4 +1,4 @@
-// Keyboard + mouse state with "pressed this frame" edge detection.
+// Keyboard + mouse + touch state with "pressed this frame" edge detection.
 const down = new Set();
 const pressed = new Set();
 
@@ -17,6 +17,7 @@ const BINDINGS = {
   nextTool: ['KeyX'],
   prevTool: ['KeyZ'],
   zoom: ['KeyF'],
+  math: ['KeyM'],
   debugSeason: ['KeyN'],
   debugTime: ['KeyT'],
 };
@@ -33,6 +34,16 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', (e) => down.delete(e.code));
 window.addEventListener('blur', () => { down.clear(); pressed.clear(); });
 
+// --- virtual input dari kontrol sentuh (src/ui/touch.js) ---
+const vAxis = { x: 0, y: 0 };
+const vDown = new Set();
+const vPressed = new Set();
+
+export function setVirtualAxis(x, y) { vAxis.x = x; vAxis.y = y; }
+export function pressVirtual(action) { vPressed.add(action); }
+export function setVirtualHeld(action, held) { if (held) vDown.add(action); else vDown.delete(action); }
+export function releaseVirtual(action) { vDown.delete(action); }
+
 export const mouse = { x: 0, y: 0, clicked: false, wheel: 0 };
 
 export function bindMouse(canvas, view) {
@@ -44,11 +55,26 @@ export function bindMouse(canvas, view) {
   canvas.addEventListener('mousemove', toLogical);
   canvas.addEventListener('mousedown', (e) => { toLogical(e); mouse.clicked = true; });
   canvas.addEventListener('wheel', (e) => { mouse.wheel = Math.sign(e.deltaY); e.preventDefault(); }, { passive: false });
+  // Sentuhan pada canvas = klik (untuk menjawab kuis, memilih menu, dll).
+  canvas.addEventListener('touchstart', (e) => {
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const r = canvas.getBoundingClientRect();
+    mouse.x = (t.clientX - r.left) * (canvas.width / r.width);
+    mouse.y = (t.clientY - r.top) * (canvas.height / r.height);
+    mouse.clicked = true;
+  }, { passive: true });
 }
 
 export const input = {
-  held(action) { return BINDINGS[action].some((c) => down.has(c)); },
-  pressed(action) { return BINDINGS[action].some((c) => pressed.has(c)); },
+  held(action) {
+    if (vDown.has(action)) return true;
+    return (BINDINGS[action] ?? []).some((c) => down.has(c));
+  },
+  pressed(action) {
+    if (vPressed.has(action)) return true;
+    return (BINDINGS[action] ?? []).some((c) => pressed.has(c));
+  },
 
   /** 1..9 if a number key was pressed this frame, else 0. */
   digit() {
@@ -61,9 +87,11 @@ export const input = {
     let x = (this.held('right') ? 1 : 0) - (this.held('left') ? 1 : 0);
     let y = (this.held('down') ? 1 : 0) - (this.held('up') ? 1 : 0);
     if (x && y) { x *= Math.SQRT1_2; y *= Math.SQRT1_2; }
+    // Joystick virtual menimpa kalau sedang dipakai.
+    if (Math.abs(vAxis.x) > 0.08 || Math.abs(vAxis.y) > 0.08) return { x: vAxis.x, y: vAxis.y };
     return { x, y };
   },
 
   /** Call once at the end of every update tick. */
-  endFrame() { pressed.clear(); mouse.clicked = false; mouse.wheel = 0; },
+  endFrame() { pressed.clear(); vPressed.clear(); mouse.clicked = false; mouse.wheel = 0; },
 };

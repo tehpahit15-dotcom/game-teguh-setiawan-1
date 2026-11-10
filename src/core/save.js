@@ -1,6 +1,13 @@
 // Versioned JSON saves in localStorage. Keeps a .bak of the previous write so a
 // bad write can be recovered. Migrations run in order v -> v+1.
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
+
+/** Daftar kelas SMA yang ditawarkan di formulir pendaftaran. */
+export const KELAS_LIST = [
+  'X-1', 'X-2', 'X-3', 'X-4', 'X-5', 'X-6', 'X-7', 'X-8',
+  'XI-1', 'XI-2', 'XI-3', 'XI-4', 'XI-5', 'XI-6', 'XI-7', 'XI-8',
+  'XII-1', 'XII-2', 'XII-3', 'XII-4', 'XII-5', 'XII-6', 'XII-7', 'XII-8',
+];
 
 /**
  * Karakter yang bisa dipilih pemain. Satu daftar dipakai homepage (kartu
@@ -54,6 +61,11 @@ const MIGRATIONS = {
     d.removals = {};
     delete d.player?.x;
     delete d.player?.y;
+    return d;
+  },
+  // v4 adds the math learning system: seed empty stats so old saves load.
+  3: (d) => {
+    d.math = d.math ?? { xp: 0, level: 1, sessions: 0, answered: 0, correct: 0, bestStreak: 0, lastScore: null };
     return d;
   },
 };

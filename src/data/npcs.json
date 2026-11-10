@@ -420,5 +420,50 @@
         "Raawwrrr"
       ]
     }
+  },
+  {
+    "id": "guru",
+    "name": "Bu Guru Ratna",
+    "sprite": "npc_ratna",
+    "portrait": "portrait_npc_ratna",
+    "role": "Guru Matematika SMA",
+    "likes": [
+      "Buku",
+      "Kopi"
+    ],
+    "dialogs": {
+      "default": [
+        "Halo! Aku Bu Guru Ratna, guru matematika di Lembah Kenanga.|Tekan E di papan matematika di plaza, atau tekan tombol M / 📐 untuk mulai latihan.",
+        "Matematika itu mudah kalau kita latihan sedikit demi sedikit.|Jawaban benar memberi XP dan koin — kumpulkan untuk naik level!",
+        "Setiap kuis 10 soal. Jawaban salah? Tenang, ada pembahasannya.|Nilai terbaikmu otomatis tercatat untuk guru."
+      ],
+      "friend": [
+        "Kamu sudah rajin latihan! Teruskan, Nak.|Ingat: streak jawaban benar memberi bonus XP.",
+        "Kalau stuck di satu soal, baca pembahasannya baik-baik.|Itu cara tercepat jadi jago matematika."
+      ]
+    },
+    "schedule": [
+      {
+        "h": 6,
+        "at": "balai"
+      },
+      {
+        "h": 9,
+        "at": "plaza"
+      },
+      {
+        "h": 15,
+        "at": "papan"
+      },
+      {
+        "h": 19,
+        "at": "balai"
+      }
+    ],
+    "wants": [
+      "wildflower",
+      "egg",
+      "coffee"
+    ]
   }
 ]

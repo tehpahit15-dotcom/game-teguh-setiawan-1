@@ -1,0 +1,15 @@
+{
+  "name": "Lembah Kenanga — Matematika SMA",
+  "short_name": "Matematika SMA",
+  "description": "Game petualangan desa untuk belajar matematika SMA. Daftar dengan nama & kelas, kerjakan kuis, nilai tersimpan di Google Sheets.",
+  "start_url": "index.html",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1a1410",
+  "theme_color": "#8b5a2b",
+  "lang": "id",
+  "icons": [
+    { "src": "assets/homepage/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

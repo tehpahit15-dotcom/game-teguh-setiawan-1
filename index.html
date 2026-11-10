@@ -2,8 +2,11 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lembah Kenanga</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#8b5a2b">
+  <title>Lembah Kenanga — Petualangan Matematika SMA</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/homepage/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
   <style>
@@ -36,29 +39,26 @@
     .panel .rule { display: block; width: 100%; max-width: 420px; margin: 0 0 16px; image-rendering: pixelated; }
     .panel p { margin: 0 0 12px; line-height: 1.3; }
 
-    /* hero */
-    /* Banner: short enough that the start form is visible without scrolling. */
     .hero { position: relative; height: clamp(150px, 26vh, 260px); border: 4px solid var(--outline); overflow: hidden;
       margin-bottom: 28px; box-shadow: 0 8px 0 var(--wood-dark);
       background: #7fc4f0 url("assets/homepage/hero.png") center 62% / cover no-repeat; }
     .hero .title { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
     .hero .logo { width: min(46%, 430px); filter: drop-shadow(0 5px 0 rgba(0,0,0,.4)); }
+    .hero .tag { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; color: #fff; font-size: 20px; text-shadow: 2px 2px 0 #3a2a2a; }
 
     .btn { display: inline-block; font-family: "Press Start 2P", monospace; font-size: 14px; padding: 14px 22px; background: var(--red); color: var(--cream); border: 4px solid var(--outline); box-shadow: 0 5px 0 #6b1f12; text-decoration: none; cursor: pointer; }
     .btn:hover { transform: translateY(2px); box-shadow: 0 3px 0 #6b1f12; }
     .btn.secondary { background: var(--green); box-shadow: 0 5px 0 #2f5f18; }
     .btn.secondary:hover { box-shadow: 0 3px 0 #2f5f18; }
     .btn[disabled] { opacity: .45; pointer-events: none; }
+    .btn.big { font-size: 18px; padding: 18px 28px; width: 100%; text-align: center; }
 
     .hint { font-size: 17px; color: #7a6647; margin-top: 6px; line-height: 1.4; }
     .err { font-size: 18px; color: #b8432e; margin-top: 8px; min-height: 24px; }
     .err.ok { color: #3f6f2a; }
 
-    /* Kolom isian dipakai di dua formulir, jadi gayanya tidak lagi terikat ke
-       .newgame — kalau tidak, kolom "lanjutkan" jatuh ke gaya bawaan peramban
-       dan terlihat seperti tempelan dari halaman lain. */
     .field { display: block; margin-bottom: 6px; font-size: 20px; }
-    .input { width: 100%; font: inherit; font-size: 24px; padding: 8px 12px;
+    .input, select.input { width: 100%; font: inherit; font-size: 24px; padding: 8px 12px;
              border: 3px solid var(--outline); background: #fff; color: var(--outline); }
     .input::placeholder { color: #b3a488; }
     .input:focus { outline: 3px solid var(--red); outline-offset: 2px; }
@@ -81,9 +81,27 @@
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; }
     .card { border: 4px solid var(--outline); background: #fff8e8; padding: 14px; box-shadow: 0 5px 0 var(--wood-dark); }
     .card img.portrait { width: 192px; height: 192px; display: block; margin: 0 auto 8px; }
-    .card .sprite { width: 32px; height: 48px; background: url("assets/sprites/characters/player_m/player_m_sheet.png") 0 0 no-repeat; margin: 0 auto 8px; transform: scale(2); transform-origin: top center; height: 96px; }
     .card h3 { font-size: 12px; margin: 8px 0 6px; }
     .card .role { color: var(--red); }
+
+    .topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .topic { border: 4px solid var(--outline); background: #fff8e8; padding: 14px; box-shadow: 0 5px 0 var(--wood-dark); }
+    .topic h3 { font-size: 12px; margin: 0 0 6px; color: var(--red); }
+    .topic .lv { color: #7a6647; font-size: 18px; }
+
+    table.board { width: 100%; border-collapse: collapse; font-size: 20px; }
+    table.board th, table.board td { border: 2px solid var(--outline); padding: 6px 10px; text-align: left; }
+    table.board th { background: var(--wood-light); color: var(--cream); }
+    table.board tr:nth-child(even) td { background: #fff8e8; }
+
+    .badge { display: inline-block; background: var(--green); color: var(--cream); border: 3px solid var(--outline); padding: 2px 10px; font-size: 18px; }
+    .badge.warn { background: #e0a040; color: var(--outline); }
+
+    @media (max-width: 720px) {
+      form.newgame { grid-template-columns: 1fr; }
+      body { font-size: 20px; }
+      .btn { font-size: 12px; padding: 12px 16px; }
+    }
   </style>
 </head>
 <body>
@@ -91,8 +109,9 @@
   <nav>
     <a class="brand pixel" href="#main">LEMBAH KENANGA</a>
     <a class="tab" href="#main">Main</a>
+    <a class="tab" href="#matematika">Matematika</a>
     <a class="tab" href="#cara-main">Cara Main</a>
-    <a class="tab" href="#karakter">Karakter</a>
+    <a class="tab" href="#peringkat">Peringkat</a>
     <a class="tab" href="#about">About</a>
   </nav>
 </header>
@@ -103,24 +122,36 @@
       <div class="title">
         <img class="logo" src="assets/homepage/logo.png" alt="Lembah Kenanga">
       </div>
+      <div class="tag">📐 Petualangan Matematika SMA — belajar sambil bermain di desa pixel!</div>
     </div>
 
     <div class="panel">
-      <h2>Mulai Petualangan</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
+      <h2>Daftar & Mulai Bermain</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
+      <p>Isi data dirimu, lalu tekan <b>MULAI</b>. Namamu dan kelasmu tercatat di <b>Google Sheets</b> guru, dan setiap nilai kuis otomatis terkirim ke sana. Bisa dimainkan langsung dari HP — tanpa instal apa pun.</p>
       <form class="newgame" id="newgame">
         <div>
-          <label class="field" for="name">Username</label>
-          <input class="input" type="text" id="name" maxlength="16" value="" placeholder="mis. Iqbal21" autocomplete="off" required>
+          <label class="field" for="nama">Nama lengkap</label>
+          <input class="input" type="text" id="nama" maxlength="40" placeholder="mis. Iqbal Ramadhan" autocomplete="name" required>
+          <div class="hint">Nama seperti di absensi sekolah.</div>
+
+          <label class="field" for="kelas" style="margin-top:14px">Kelas</label>
+          <select class="input" id="kelas" required></select>
+          <div class="hint">Pilih kelasmu (X, XI, atau XII).</div>
+
+          <label class="field" for="name" style="margin-top:14px">Username</label>
+          <input class="input" type="text" id="name" maxlength="16" placeholder="mis. Iqbal21" autocomplete="off" required>
           <div class="hint">Huruf dan angka saja, 3–16 karakter, tanpa spasi. Username ini yang kamu pakai untuk melanjutkan nanti.</div>
-          <label class="field" for="farm" style="margin-top:14px">Nama ladang</label>
-          <input class="input" type="text" id="farm" maxlength="18" value="Ladang Kenanga" required>
+
+          <label class="field" for="farm" style="margin-top:14px">Nama ladang (opsional)</label>
+          <input class="input" type="text" id="farm" maxlength="18" value="Ladang Kenanga">
         </div>
         <div>
           <label class="field">Pilih avatar</label>
           <div class="avatars" id="avatars"></div>
+          <div class="hint" style="margin-top:12px">📱 <b>Di HP:</b> setelah daftar, game terbuka di browser. Putar HP landscape, pakai joystick kiri + tombol E / 📐 di kanan. Bisa ditambah ke layar utama (menu browser → “Tambah ke Layar Utama”).</div>
         </div>
         <div class="actions">
-          <button class="btn" type="submit" id="startbtn">MULAI BARU</button>
+          <button class="btn" type="submit" id="startbtn">MULAI BARU ▶</button>
           <div class="err" id="newerr"></div>
         </div>
       </form>
@@ -132,106 +163,74 @@
           <button class="btn secondary" type="submit" id="resumebtn">LANJUTKAN</button>
         </form>
         <div class="err" id="resumeerr"></div>
+        <div class="hint" id="sheets-status"></div>
       </div>
+    </div>
+  </section>
+
+  <section id="matematika">
+    <div class="panel">
+      <h2>Latihan Matematika SMA</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
+      <p>Di dalam game, tekan <kbd>M</kbd> / tombol <b>📐</b>, atau berdiri di depan <b>Papan Matematika</b> di plaza (dekat Balai Desa) lalu tekan <kbd>E</kbd>. Setiap kuis berisi <b>10 soal pilihan ganda</b> dengan pembahasan. Jawaban benar = <b>+100 XP + 50 koin</b>, streak memberi bonus!</p>
+      <div class="topics" id="topics"></div>
+      <p style="margin-top:16px">Nilai setiap kuis (skor, benar/salah, XP) otomatis dikirim ke <b>sheet “Nilai”</b> di Google Sheets guru — lengkap dengan nama, kelas, dan tanggal. Kalau internet mati, nilai tersimpan di HP dan terkirim otomatis saat online lagi.</p>
+    </div>
+    <div class="panel">
+      <h2>Cara Mendapat XP & Koin</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
+      <p>✅ Jawaban benar: <b>+100 XP</b> dan <b>+50 koin</b> &nbsp;·&nbsp; 🔥 Streak 3+: bonus XP & koin &nbsp;·&nbsp; 📈 Setiap 500 XP naik 1 level &nbsp;·&nbsp; 🪙 Koin bisa dipakai belanja di Toko Bu Sari &nbsp;·&nbsp; 🌾 Bertani & memancing tetap bisa untuk menambah koin.</p>
+      <p>Temui <b>Bu Guru Ratna</b> di plaza — dia akan membukakan latihan untukmu. Selesaikan kuis sebanyak-banyaknya untuk jadi juara kelas!</p>
     </div>
   </section>
 
   <section id="cara-main">
     <div class="panel">
-      <h2>Kontrol</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
+      <h2>Kontrol (Komputer & HP)</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
       <div class="keys">
-        <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / panah — berjalan</div>
-        <div><kbd>Shift</kbd> (tahan) — berlari</div>
-        <div><kbd>E</kbd> di tepi air — memancing (sambil memegang pancing)</div>
-        <div><kbd>E</kbd> / <kbd>Spasi</kbd> — pakai alat, bicara, panen, tidur</div>
-        <div><kbd>1</kbd>…<kbd>9</kbd>, <kbd>X</kbd>/<kbd>Z</kbd>, roda mouse — pilih alat</div>
-        <div><kbd>I</kbd> / <kbd>Tab</kbd> — inventori (panah pilih, <kbd>E</kbd> pindah, <kbd>Backspace</kbd> buang)</div>
-        <div><kbd>G</kbd> — beri hadiah ke warga yang kamu hadapi</div>
-        <div><kbd>C</kbd> — makan barang yang dipegang</div>
-        <div><kbd>Esc</kbd> — menu (Lanjut, Petunjuk, Pengaturan, Keluar)</div>
-        <div>Gelembung pojok kiri bawah — obrolan publik dengan pemain lain yang online</div>
-        <div><kbd>F</kbd> — ganti zoom (juga ada di Pengaturan)</div>
-        <div><kbd>N</kbd> / <kbd>T</kbd> — (uji coba) ganti musim / +1 jam</div>
+        <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / panah / <b>joystick</b> — berjalan</div>
+        <div><kbd>Shift</kbd> / 🏃 — berlari</div>
+        <div><kbd>M</kbd> / 📐 — latihan matematika</div>
+        <div><kbd>E</kbd> / tombol E — pakai alat, bicara, panen, tidur, jawab kuis</div>
+        <div><kbd>1</kbd>…<kbd>9</kbd> — pilih alat di hotbar</div>
+        <div><kbd>I</kbd> / 🎒 — inventori</div>
+        <div><kbd>G</kbd> / 🎁 — beri hadiah ke warga</div>
+        <div><kbd>Esc</kbd> / ☰ — menu</div>
       </div>
+      <p style="margin-top:14px">Di HP, kontrol sentuh otomatis muncul: <b>joystick kiri</b> untuk jalan, tombol <b>E</b> untuk berinteraksi, <b>📐</b> untuk matematika. Jawaban kuis tinggal <b>ketuk</b>.</p>
     </div>
     <div class="panel">
-      <h2>Ritme Hari</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
-      <p>Hari dimulai pukul 06:00. Setiap aksi dengan alat memakai <b>energi</b>; makan memulihkannya. Berdiri di depan pintu rumah lalu tekan <kbd>E</kbd> untuk <b>tidur</b> sebelum pukul 02:00 — kalau lewat, kamu pingsan dan bangun dengan energi separuh. Tidur juga <b>menyimpan</b> permainanmu.</p>
-      <p><b>Papan pengumuman</b> di desa memberi tanggal, cuaca hari ini, dan ramalan besok.</p>
-      <p>Tidak ada layar pemuatan: semua tempat berada di satu peta, dan setiap bangunan dilayani langsung di depan pintunya.</p>
-      <p>Satu musim = 28 hari. Ada empat musim: <b>Semi, Panas, Gugur, Dingin</b>. Tanaman hanya tumbuh di musimnya; saat musim berganti, tanaman yang tidak cocok akan layu.</p>
-    </div>
-    <div class="panel">
-      <h2>Bertani</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
-      <p><b>Cangkul</b> tanah → <b>tanam benih</b> → <b>siram</b> setiap hari → <b>panen</b>. Mencangkul dan menanam hanya bisa di dalam <b>petak kebun berpagar</b>. Isi ulang penyiram di sumur. Hasil panen dimasukkan ke <b>kotak jual</b> di dekat rumah dan dibayar keesokan paginya. Hujan menyiram semua tanaman untukmu.</p>
-      <p>Setiap tanaman hanya tumbuh di musimnya. Saat musim berganti, tanaman yang tidak cocok akan layu — jadi perhatikan kalender.</p>
-      <p>Kapak menebang pohon dan batang kayu (kayu), beliung memecah batu (batu), sabit membersihkan rumput liar (serat). Semak berbuah bisa dipetik jadi beri.</p>
-      <p>Beri makan ayam dan sapi di kandang; keesokan harinya mereka menghasilkan telur dan susu yang bisa kamu ambil.</p>
-    </div>
-    <div class="panel">
-      <h2>Belanja & Alat</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
-      <p>Berdiri di depan pintu toko dan tekan <kbd>E</kbd> — menunya langsung terbuka, tanpa perlu masuk ke dalam.</p>
-      <p><b>Toko Bu Sari</b> (buka 09:00–17:00) menjual benih sesuai musim, pakan ternak, dan umpan. Kamu juga bisa menjual barang di sana lewat tab <b>JUAL</b>.</p>
-      <p><b>Pandai Besi</b> (buka 09:00–16:00) meningkatkan alatmu. Tingkat <b>Tembaga</b> butuh G500 + 5 batu dan menghemat 1 energi setiap ayunan; <b>Besi</b> butuh G2.000 + 5 bijih tembaga. Tekan <kbd>Tab</kbd> di layar pandai besi untuk memilih alat yang ingin ditingkatkan.</p>
-      <p>Warung Kopi dan Balai Desa menyusul.</p>
-    </div>
-    <div class="panel">
-      <h2>Tempat yang Bisa Dikunjungi</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
-      <p>Seluruh lembah adalah <b>satu peta</b> — tidak ada layar pemuatan saat berpindah tempat.</p>
-      <p><b>Ladang</b> (utara-barat) — rumahmu, petak kebun berpagar, kandang ayam dan lumbung sapi, sumur, dan kotak jual.</p>
-      <p><b>Pusat Desa</b> (timur) — plaza batu dengan air mancur, Balai Desa berjam, toko Bu Sari, warung kopi, pandai besi, dan papan pengumuman.</p>
-      <p><b>Hutan</b> (barat daya) — pepohonan rapat, kolam berlili, dan pondok bunga Rani. Sumber kayu, batu, beri, jamur, dan bunga liar.</p>
-      <p><b>Distrik Selatan</b> — klinik Dokter Ratna dan tiga rumah warga yang menghadap satu jalan.</p>
-      <p><b>Pantai</b> (selatan) — pasir, pohon kelapa, kerang dan rumput laut untuk dipungut, pondok Nenek Wulan, serta dermaga kayu yang bisa kamu susuri sampai ke ujung.</p>
-      <p>Satu jalur utama turun dari jalan besar desa sampai ke dermaga, dan dua papan penunjuk berdiri di percabangannya — jadi kamu tidak perlu menebak arah.</p>
-      <p><b>Rumah</b> — tekan <kbd>E</kbd> di depan pintu untuk tidur.</p>
-      <p><b>Memancing</b> — sapa <b>Nenek Wulan</b> di pondok tepi pantai, dia akan memberimu pancingnya yang lama (kalau keburu penasaran, Bu Sari juga menjualnya G350). Lalu berdiri menghadap air dan tekan <kbd>E</kbd>. Tunggu pelampungnya tersentak, tekan <kbd>E</kbd> lagi untuk mengait, lalu tahan <kbd>E</kbd> untuk menjaga batang hijau tetap menutupi ikannya. Kolam hutan dan laut punya ikan yang berbeda, dan sebagian hanya muncul malam hari atau di musim tertentu. Lemparkan di dekat bayangan ikan yang lewat: sambarannya lebih cepat dan tangkapannya lebih bagus.</p>
-    </div>
-
-    <div class="panel">
-      <h2>Warga Desa</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
-      <p>Sapa warga sekali sehari untuk menambah hati sedikit demi sedikit. Pegang barang lalu tekan <kbd>G</kbd> di depan mereka untuk memberi hadiah — satu hadiah per orang per hari, dan barang kesukaannya bernilai jauh lebih besar. Setelah <b>empat hati</b>, mereka mulai bercerita hal yang tidak mereka ceritakan ke sembarang orang.</p>
-      <p>Warga punya jadwal harian. Bu Sari menjaga toko sampai sore lalu ke plaza, Bang Jaka dan Bayu mampir ke warung selepas kerja, Nenek Wulan turun ke dermaga saat pagi. Desa ini terlihat berbeda tergantung jam berapa kamu datang.</p>
+      <h2>Ritme Hari & Bertani</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
+      <p>Hari dimulai pukul 06:00. Setiap aksi dengan alat memakai <b>energi</b>; makan memulihkannya. Berdiri di depan pintu rumah lalu tekan <kbd>E</kbd> untuk <b>tidur</b> — tidur juga <b>menyimpan</b> permainanmu.</p>
+      <p><b>Cangkul</b> tanah → <b>tanam benih</b> → <b>siram</b> setiap hari → <b>panen</b> → jual di kotak jual. Hasil panen dibayar keesokan paginya. Satu musim = 28 hari (Semi, Panas, Gugur, Dingin).</p>
+      <p><b>Memancing:</b> pegang pancing, berdiri menghadap air, tekan <kbd>E</kbd>. Tunggu pelampung tersentak, tekan <kbd>E</kbd> lagi, lalu tahan untuk menjaga batang hijau menutupi ikan.</p>
     </div>
   </section>
 
-  <section id="karakter">
+  <section id="peringkat">
     <div class="panel">
-      <h2>Warga Lembah Kenanga</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
-      <div class="cards">
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/player_m.png" alt=""><h3>Arya</h3><div class="role">Bisa kamu pilih</div><p>Bertopi jerami dan berbaju kodok biru. Mewarisi ladang kakek dan pindah dari kota.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/player_f.png" alt=""><h3>Laras</h3><div class="role">Bisa kamu pilih</div><p>Bertopi jerami dan berbaju kodok abu. Mewarisi ladang kakek dan pindah dari kota.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/player_m2.png" alt=""><h3>Damar</h3><div class="role">Bisa kamu pilih</div><p>Berkacamata bulat dan berkemeja hijau, lengan tergulung. Mewarisi ladang kakek dan pindah dari kota.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/player_f2.png" alt=""><h3>Nadia</h3><div class="role">Bisa kamu pilih</div><p>Berkerudung krem dan bertunik marun. Mewarisi ladang kakek dan pindah dari kota.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/npc_harun.png" alt=""><h3>Pak Lurah Harun</h3><div class="role">Kepala desa</div><p>Bijak dan hangat. Memberimu tugas pertama. Suka: kopi, labu.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/npc_sari.png" alt=""><h3>Bu Sari</h3><div class="role">Toko kelontong</div><p>Menjual benih dan membeli hasil panen. Suka: stroberi, bunga.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/npc_jaka.png" alt=""><h3>Bang Jaka</h3><div class="role">Pandai besi</div><p>Menempa di bengkelnya sepanjang hari dan meningkatkan alatmu. Suka: bijih, kopi.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/npc_dadang.png" alt=""><h3>Kang Dadang</h3><div class="role">Pemilik warung</div><p>Menjaga warung kopi di ujung timur jalan besar. Suka: telur, cabai.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/npc_ratna.png" alt=""><h3>Dokter Ratna</h3><div class="role">Klinik desa</div><p>Merawat warga di klinik distrik selatan. Suka: jamu, bunga liar.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/npc_wulan.png" alt=""><h3>Nenek Wulan</h3><div class="role">Nelayan tua</div><p>Lima puluh tahun memancing di teluk ini. Tinggal di pondok tepi pantai. Suka: kerang, rumput laut.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/npc_rani.png" alt=""><h3>Rani</h3><div class="role">Pembudidaya bunga</div><p>Tinggal di pondok tepi hutan, dekat kolam. Suka: bunga liar, madu.</p></div>
-        <div class="card"><img class="portrait" src="assets/sprites/portraits/npc_bayu.png" alt=""><h3>Bayu</h3><div class="role">Nelayan muda</div><p>Hampir selalu berdiri di ujung dermaga. Murid Nenek Wulan. Suka: ikan kakap, kopi.</p></div>
-      </div>
+      <h2>Papan Peringkat (Perangkat Ini)</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
+      <p>Peringkat lengkap seluruh siswa ada di <b>Google Sheets guru</b> (sheet “Nilai”). Di bawah ini adalah riwayat kuismu di perangkat ini.</p>
+      <div id="my-board"><p class="hint">Belum ada kuis yang selesai di perangkat ini. Mainkan kuis pertamamu!</p></div>
     </div>
   </section>
 
   <section id="about">
     <div class="panel">
       <h2>Tentang Game</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
-      <p><b>Lembah Kenanga</b> adalah game simulasi kehidupan desa berbasis web, terinspirasi Harvest Moon dan Stardew Valley, dengan nuansa desa Indonesia: balai desa, warung kopi, batik, dan warga yang ramah.</p>
-      <p>Game ini berjalan sepenuhnya di browser (HTML5 Canvas, tanpa plugin) dan menyimpan progres di perangkatmu.</p>
+      <p><b>Lembah Kenanga — Matematika SMA</b> adalah game petualangan desa berbasis web untuk belajar matematika SMA: Aljabar, Geometri, Trigonometri, Statistika, Peluang, Logika & Himpunan, dan Kalkulus Dasar (Kelas X–XII).</p>
+      <p>Game berjalan sepenuhnya di browser (HTML5 Canvas, tanpa plugin), bisa dimainkan dari HP maupun komputer, dan menyimpan progres di perangkatmu + Google Sheets.</p>
     </div>
     <div class="panel">
       <h2>Catatan Teknis</h2><img class="rule" src="assets/homepage/orn_divider.png" alt="">
-      <p>Engine: JavaScript murni + Canvas 2D, tile 32 px, proyeksi oblique top-down. Aset gambar dibuat dengan bantuan AI (Higgsfield, Nano Banana Pro) lalu dinormalisasi manual dengan Python: chroma-key, slicing frame, kuantisasi palet, dan uji seam.</p>
-      <p>Versi: 0.7 — satu lembah utuh tanpa layar pemuatan; bertani penuh, ternak, cuaca, belanja & upgrade alat, umpan balik aksi, musik latar, dan menu jeda dengan pengaturan.</p>
+      <p>Engine: JavaScript murni + Canvas 2D. Pendaftaran & nilai dikirim ke Google Sheets lewat Apps Script Web App (lihat <b>docs/GOOGLE_SHEETS_SETUP.md</b>). Game bisa di-deploy gratis ke GitHub Pages / Netlify / Vercel (lihat <b>docs/DEPLOY.md</b>).</p>
     </div>
   </section>
 </main>
 
 <script type="module">
-  import { setNewGame, writeSave, writeProfile, AVATARS } from './src/core/save.js';
+  import { setNewGame, writeSave, writeProfile, AVATARS, KELAS_LIST } from './src/core/save.js';
   import { validate, check, register, resume, currentUsername } from './src/core/account.js';
+  import { registerStudent, readStudentLocal, pendingCount } from './src/core/sheets.js';
+  import { sheetsConfigured } from './src/core/config.js';
 
   const tabs = [...document.querySelectorAll('nav a.tab')];
   const sections = [...document.querySelectorAll('main section')];
@@ -244,11 +243,56 @@
   window.addEventListener('hashchange', route);
   route();
 
-  // Kartu avatar dibangun dari AVATARS supaya menambah karakter berikutnya
-  // tidak perlu menyentuh HTML di dua tempat.
+  // Isi dropdown kelas
+  document.getElementById('kelas').innerHTML =
+    '<option value="">— Pilih kelas —</option>' +
+    KELAS_LIST.map((k) => `<option value="${k}">${k}</option>`).join('');
+
+  // Kartu avatar dibangun dari AVATARS
   document.getElementById('avatars').innerHTML = AVATARS.map((a, i) => `
     <label><input type="radio" name="avatar" value="${a.id}"${i === 0 ? ' checked' : ''}>
       <img src="assets/sprites/portraits/${a.id}.png" alt="">${a.label}</label>`).join('');
+
+  // Daftar topik matematika
+  try {
+    const math = await fetch('src/data/math.json').then((r) => r.json());
+    document.getElementById('topics').innerHTML = math.topics.map((t) => `
+      <div class="topic"><h3>📐 ${t.name}</h3><div>${t.desc}</div><div class="lv">Kelas ${t.levels.join(', ')}</div></div>`).join('');
+  } catch { document.getElementById('topics').innerHTML = '<p class="hint">Gagal memuat daftar topik.</p>'; }
+
+  // Status Sheets
+  const st = document.getElementById('sheets-status');
+  if (sheetsConfigured()) {
+    st.innerHTML = `✅ Terhubung ke Google Sheets. ${pendingCount() ? pendingCount() + ' data menunggu dikirim.' : ''}`;
+  } else {
+    st.innerHTML = 'ℹ️ Google Sheets belum dikonfigurasi guru (SHEETS_URL kosong) — pendaftaran tetap tersimpan di perangkat ini dan akan dikirim otomatis setelah dikonfigurasi.';
+  }
+
+  // Papan peringkat lokal (dari save perangkat ini)
+  function renderBoard() {
+    const el = document.getElementById('my-board');
+    let save = null;
+    try { save = JSON.parse(localStorage.getItem('lk_save_0') || 'null'); } catch {}
+    const m = save?.math;
+    const student = readStudentLocal();
+    if (!m || !m.sessions) {
+      el.innerHTML = '<p class="hint">Belum ada kuis yang selesai di perangkat ini. Mainkan kuis pertamamu!</p>';
+      return;
+    }
+    const acc = m.answered ? Math.round((m.correct / m.answered) * 100) : 0;
+    el.innerHTML = `
+      <p>${student ? `Siswa: <b>${student.nama}</b> · Kelas <b>${student.kelas}</b>` : ''}</p>
+      <table class="board">
+        <tr><th>Statistik</th><th>Nilai</th></tr>
+        <tr><td>Level</td><td>${m.level}</td></tr>
+        <tr><td>Total XP</td><td>${m.xp}</td></tr>
+        <tr><td>Sesi kuis selesai</td><td>${m.sessions}</td></tr>
+        <tr><td>Jawaban benar / total</td><td>${m.correct} / ${m.answered} (${acc}%)</td></tr>
+        <tr><td>Streak terbaik</td><td>${m.bestStreak}</td></tr>
+        <tr><td>Skor terakhir</td><td>${m.lastScore ?? '-'}</td></tr>
+      </table>`;
+  }
+  renderBoard();
 
   const nameEl = document.getElementById('name');
   const newErr = document.getElementById('newerr');
@@ -257,8 +301,6 @@
   const resumeErr = document.getElementById('resumeerr');
   const resumeBtn = document.getElementById('resumebtn');
 
-  // Isi kolom lanjutkan dengan username terakhir di peramban ini, sekadar
-  // kenyamanan — bukan sesi yang tersimpan.
   resumeEl.value = currentUsername() ?? '';
 
   const say = (el, msg, good = false) => {
@@ -266,8 +308,6 @@
     el.classList.toggle('ok', good);
   };
 
-  // Cek ketersediaan sambil mengetik, supaya kesalahan ketahuan sebelum tombol
-  // ditekan. Diberi jeda agar tidak satu permintaan per huruf.
   let checkTimer = 0;
   nameEl.addEventListener('input', () => {
     const u = nameEl.value.trim();
@@ -277,6 +317,7 @@
     say(newErr, 'Memeriksa...');
     checkTimer = setTimeout(async () => {
       const r = await check(u);
+      if (r.offline) { say(newErr, 'Mode offline — tetap bisa daftar & main.', true); return; }
       say(newErr, r.available ? `"${u}" tersedia.` : r.reason, r.available);
     }, 350);
   });
@@ -284,26 +325,37 @@
   document.getElementById('newgame').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = nameEl.value.trim();
+    const nama = document.getElementById('nama').value.trim();
+    const kelas = document.getElementById('kelas').value;
     const err = validate(username);
     if (err) return say(newErr, err);
+    if (!nama) return say(newErr, 'Nama lengkap belum diisi.');
+    if (!kelas) return say(newErr, 'Kelas belum dipilih.');
 
     startBtn.disabled = true;
     say(newErr, 'Mendaftarkan...');
+    const avatar = document.querySelector('input[name=avatar]:checked').value;
     const profile = {
       name: username,
+      nama,
+      kelas,
       farmName: document.getElementById('farm').value.trim() || 'Ladang Kenanga',
-      avatar: document.querySelector('input[name=avatar]:checked').value,
+      avatar,
     };
+    // 1) Daftarkan ke Google Sheets (nama + kelas). Gagal/offline = antre.
+    const sheetsRes = await registerStudent({ nama, kelas, username, avatar });
+    // 2) Daftarkan akun game (server obrolan). Offline = lanjut lokal.
     const r = await register(username, profile);
     startBtn.disabled = false;
-    if (!r.ok) return say(newErr, r.error ?? 'Gagal mendaftar.');
+    if (!r.ok && !r.offline) return say(newErr, r.error ?? 'Gagal mendaftar.');
 
-    // Simpanan lama di peramban ini milik username lain; buang supaya tidak
-    // terbawa ke permainan yang baru.
     localStorage.removeItem('lk_save_0');
     localStorage.removeItem('lk_save_0.bak');
     setNewGame(profile);
-    location.href = 'game.html';
+    writeProfile(profile);
+    const note = sheetsRes.ok ? 'Tersimpan di Google Sheets ✓' : 'Tersimpan lokal (Sheets menyusul)';
+    say(newErr, note, true);
+    setTimeout(() => { location.href = 'game.html'; }, 600);
   });
 
   document.getElementById('resumeform').addEventListener('submit', async (e) => {
@@ -316,12 +368,13 @@
     say(resumeErr, 'Mengambil simpanan...');
     const r = await resume(username);
     resumeBtn.disabled = false;
-    if (!r.ok) return say(resumeErr, r.error ?? 'Gagal melanjutkan.');
+    if (!r.ok && !r.offline) return say(resumeErr, r.error ?? 'Gagal melanjutkan.');
 
-    // Simpanan dari server ditulis ke localStorage lebih dulu, lalu game boot
-    // seperti biasa. Satu jalur muat, bukan dua.
     if (r.save) writeSave(r.save, 0);
-    else { localStorage.removeItem('lk_save_0'); localStorage.removeItem('lk_save_0.bak'); }
+    else if (r.offline) {
+      // Offline: pakai simpanan lokal yang ada (jangan hapus).
+      say(resumeErr, 'Offline — melanjutkan dengan simpanan di perangkat ini.', true);
+    } else { localStorage.removeItem('lk_save_0'); localStorage.removeItem('lk_save_0.bak'); }
     writeProfile(r.profile ?? { name: r.username });
     location.href = 'game.html';
   });
