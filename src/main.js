@@ -94,10 +94,10 @@ async function boot() {
   state.fishingUI = new FishingUI(state.fishing);
   state.math = new MathSystem();
   state.math.load(mathData);
-  state.math.loadJSON(save?.math);
   state.mathUI = new MathUI(state.math, state.audio, onMathFinish);
 
   const save = readSave(0);
+  state.math.loadJSON(save?.math);
   const fresh = takeNewGame();
   // Newest wins: the homepage handoff, then the save file, then whatever was
   // stored the last time the game booted. Then store it again straight away, so
